@@ -12,14 +12,10 @@ import (
 
 // User has and belongs to many languages, `user_languages` is the join table
 
-func (u *User) Birth() uint {
-
-}
-
 func main() {
 
 	golog := log.New(os.Stdout, "\r\n", log.LstdFlags) // io writer
-	f, err := os.OpenFile("testlogfile", os.O_RDWR, 0666)
+	f, err := os.Create("testlogfile")
 	if err != nil {
 		golog.Fatalf("error opening file: %v", err)
 	} else {
@@ -40,8 +36,9 @@ func main() {
 
 		},
 	)
-	dsn := "host=172.17.0.3 user=cgg password=1234_abc dbname=fengshui port=5432 sslmode=disable TimeZone=Asia/Taipei"
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
+	DB_URL := os.Getenv("DB_URL")
+	// dsn := "host=172.17.0.3 user=cgg password=1234_abc dbname=fengshui port=5432 sslmode=disable TimeZone=Asia/Taipei"
+	db, err := gorm.Open(postgres.Open(DB_URL), &gorm.Config{
 		Logger: newLogger,
 		// NamingStrategy: MyNamingStrategy{},
 	})
@@ -51,8 +48,9 @@ func main() {
 		db = db.Debug()
 
 		// db.Session(&gorm.Session{DryRun: true}).AutoMigrate(&cards, &user)
-		// db.AutoMigrate(&cards, &user)
-		db.Session(&gorm.Session{DryRun: true}).Create(&user)
+		var user User
+		var password Password
+		db.AutoMigrate(&user, &password)
 
 	}
 

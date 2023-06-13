@@ -6,12 +6,13 @@ import (
 
 type User struct {
 	gorm.Model
-	name  string
-	email string
+	name     string
+	email    string
+	Password Password
 }
 
 type Password struct {
-	User       User   `gorm:"primaryKey"`
+	UserID     uint
 	Plaintext  string `gorm:"-:all"`
 	CipherText string
 }
