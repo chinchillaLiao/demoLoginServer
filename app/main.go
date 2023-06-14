@@ -1,57 +1,45 @@
 package main
 
 import (
-	"log"
-	"os"
-	"time"
-
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
-	"gorm.io/gorm/logger"
+	datatbases "demoLoginServer/databases"
+	mod "demoLoginServer/models"
+	"fmt"
 )
 
 // User has and belongs to many languages, `user_languages` is the join table
 
 func main() {
 
-	golog := log.New(os.Stdout, "\r\n", log.LstdFlags) // io writer
-	f, err := os.Create("testlogfile")
-	if err != nil {
-		golog.Fatalf("error opening file: %v", err)
-	} else {
-		golog.SetOutput(f)
-		defer f.Close()
-		golog.Println("Log begins")
-	}
-
-	newLogger := logger.New(
-		golog,
-
-		logger.Config{
-			SlowThreshold:             time.Second, // Slow SQL threshold
-			LogLevel:                  logger.Info, // Log level
-			IgnoreRecordNotFoundError: true,        // Ignore ErrRecordNotFound error for logger
-			ParameterizedQueries:      false,       // Don't include params in the SQL log
-			Colorful:                  true,        // Disable color
-
+	db, _ := datatbases.Init()
+	// (&mod.User{Name: "Gary", Password: mod.Password{Plaintext: "1234"}}).Create(db)
+	// (&mod.User{Name: "Gary2", Password: mod.Password{Plaintext: "1234"}}).Create(db)
+	user1 := mod.User{
+		Email: "gary@example.com",
+		Password: mod.Password{
+			Plaintext: "1234",
 		},
-	)
-	DB_URL := os.Getenv("DB_URL")
-	// dsn := "host=172.17.0.3 user=cgg password=1234_abc dbname=fengshui port=5432 sslmode=disable TimeZone=Asia/Taipei"
-	db, err := gorm.Open(postgres.Open(DB_URL), &gorm.Config{
-		Logger: newLogger,
-		// NamingStrategy: MyNamingStrategy{},
-	})
-
-	// db, err := gorm.Open(sqlite.Open("gorm.db"), &gorm.Config{})
-	if err == nil {
-		db = db.Debug()
-
-		// db.Session(&gorm.Session{DryRun: true}).AutoMigrate(&cards, &user)
-		var user User
-		var password Password
-		db.AutoMigrate(&user, &password)
-
 	}
+
+	err1 := user1.Create(db)
+	if err1 != nil {
+		fmt.Println("user1", err1)
+	} else {
+		fmt.Println("user1 created")
+	}
+
+	var user2 = user1
+	err2 := user2.Create(db)
+	if err2 != nil {
+		fmt.Println("user2", err2)
+	} else {
+		fmt.Println("user2 created")
+	}
+	success1, _ := user1.Login(db)
+	fmt.Println("user1 login:", success1)
+
+	var user3 = user1
+	user3.Password.Plaintext = "abcd"
+	success3, _ := user3.Login(db)
+	fmt.Println("user3 login:", success3)
 
 }
