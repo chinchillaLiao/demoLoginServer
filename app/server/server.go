@@ -7,7 +7,8 @@ import (
 
 func Init(db *gorm.DB) *gin.Engine {
 	router := gin.Default()
-	// hands := handlers{db}
+
+	// routers
 	router.Use(DBMiddleware(db))
 	router.POST("/user/register", register)
 	router.POST("/user/login", login)

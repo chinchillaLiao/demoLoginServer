@@ -27,7 +27,8 @@ func (u *User) Create(db *gorm.DB) error {
 
 func (u *User) Login(db *gorm.DB) (success bool, err error) {
 	// 我覺得GORM在查詢這塊，並沒有辦法完全做到ORM，例如欄位名稱必須硬寫資料庫內的欄位名稱，那不如直接寫SQL吧。
-	tx := db.Raw("SELECT cipher_text FROM users U, passwords P WHERE U.user_id = P.user_id and U.email = ?", u.Email).Scan(&u.Password.CipherText)
+	tx := db.Table("users U").Joins("inner join passwords P on U.user_id = P.user_id").Where("U.email = ?", u.Email).Select("cipher_text").Scan(&u.Password.CipherText)
+	// tx := db.Raw("SELECT cipher_text FROM users U, passwords P WHERE U.user_id = P.user_id and U.email = ?", u.Email).Scan(&u.Password.CipherText)
 	fmt.Println(u)
 	if tx.Error == nil {
 		success = u.Password.Match()

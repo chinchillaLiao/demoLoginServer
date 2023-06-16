@@ -8,7 +8,7 @@ import (
 )
 
 type Password struct {
-	UserID     string `gorm:"size:22;primaryKey"`
+	UserID     string `gorm:"size:22;primaryKey;"`
 	Plaintext  string `gorm:"-:all"`
 	CipherText string `gorm:"size:60"`
 	UpdatedAt  time.Time

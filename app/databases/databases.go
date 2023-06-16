@@ -4,11 +4,9 @@ import (
 	mod "demoLoginServer/models"
 	"log"
 	"os"
-	"time"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-	"gorm.io/gorm/logger"
 )
 
 func Init() (db *gorm.DB, err error) {
@@ -22,23 +20,12 @@ func Init() (db *gorm.DB, err error) {
 		golog.Println("Log begins")
 	}
 
-	newLogger := logger.New(
-		// golog,
-		log.New(os.Stdout, "\r\n", log.LstdFlags),
-		logger.Config{
-			SlowThreshold:             time.Second, // Slow SQL threshold
-			LogLevel:                  logger.Info, // Log level
-			IgnoreRecordNotFoundError: true,        // Ignore ErrRecordNotFound error for logger
-			ParameterizedQueries:      false,       // Don't include params in the SQL log
-			Colorful:                  false,       // Disable color
-
-		},
-	)
 	DB_URL := os.Getenv("DB_URL")
 	db, err = gorm.Open(postgres.Open(DB_URL), &gorm.Config{
-		Logger: newLogger,
+		Logger: EnvLogger(),
 	})
 
+	// AutoMigrate
 	if err == nil {
 		db = db.Debug()
 		var user mod.User
